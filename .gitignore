@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+backend/dist/
+frontend/dist/
+
+# terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+tfplan
+
+# local env / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# misc
+.DS_Store
+*.log
+coverage/
