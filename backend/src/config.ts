@@ -2,7 +2,10 @@
 // PERMUTATION_SEED, the word list) must stay stable once you go live, or future
 // days reshuffle. Days already written to DynamoDB are frozen regardless.
 
-export const EPOCH_DATE = "2026-01-01"; // day 0 of the puzzle calendar
+export const EPOCH_DATE = "2026-09-07"; // day 0 of the puzzle calendar (launch day)
+
+// No puzzle is served before this date. Separate from EPOCH_DATE so they can diverge later.
+export const LAUNCH_DATE = process.env.WORDLE_LAUNCH ?? "2026-09-07";
 export const TIMEZONE = process.env.WORDLE_TZ ?? "America/New_York"; // word flips at local midnight here
 export const PERMUTATION_SEED = process.env.WORDLE_SEED ?? "wordle-es-v1";
 

@@ -1,4 +1,4 @@
-import { EPOCH_DATE, TIMEZONE } from "./config.js";
+import { EPOCH_DATE, LAUNCH_DATE, TIMEZONE } from "./config.js";
 
 const MS_PER_DAY = 86_400_000;
 
@@ -33,4 +33,9 @@ export function isValidDateString(s: string): boolean {
 // Is `dateStr` strictly after "today" in the configured timezone?
 export function isFutureDate(dateStr: string): boolean {
   return dateStr > isoDateInTZ();
+}
+
+// Zero-padded YYYY-MM-DD, so a lexicographic compare is chronological.
+export function isBeforeLaunch(dateStr: string, launch: string = LAUNCH_DATE): boolean {
+  return dateStr < launch;
 }

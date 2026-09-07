@@ -29,19 +29,43 @@ resource "aws_lambda_function" "api" {
   tags = { Project = var.project }
 }
 
-# Function URL, reachable only by CloudFront (IAM auth + OAC signing).
+# Public URL; the app password + HMAC token is the real gate. Avoids the OAC
+# SigV4 signing that broke the browser-facing API.
 resource "aws_lambda_function_url" "api" {
   function_name      = aws_lambda_function.api.function_name
-  authorization_type = "AWS_IAM"
+  authorization_type = "NONE"
 }
 
-resource "aws_lambda_permission" "cloudfront_invoke_url" {
-  statement_id           = "AllowCloudFrontInvokeUrl"
+# Auth type NONE still needs a resource policy granting public access, and since
+# Oct 2025 a new function URL needs both actions ("dual auth").
+resource "aws_lambda_permission" "public_invoke_url" {
+  statement_id           = "FunctionURLAllowPublicAccess"
   action                 = "lambda:InvokeFunctionUrl"
   function_name          = aws_lambda_function.api.function_name
-  principal              = "cloudfront.amazonaws.com"
-  source_arn             = aws_cloudfront_distribution.site.arn
-  function_url_auth_type = "AWS_IAM"
+  principal              = "*"
+  function_url_auth_type = "NONE"
+}
+
+# The second statement needs the lambda:InvokedViaFunctionUrl condition, which
+# aws_lambda_permission can't set yet (hashicorp/terraform-provider-aws#44829),
+# so add it via the CLI.
+resource "null_resource" "invoke_function_dual_auth" {
+  triggers = {
+    function_name = aws_lambda_function.api.function_name
+    region        = var.aws_region
+    statement_id  = "FunctionURLInvokeAllowPublicAccess"
+  }
+
+  provisioner "local-exec" {
+    command = "aws lambda add-permission --region ${self.triggers.region} --function-name ${self.triggers.function_name} --statement-id ${self.triggers.statement_id} --action lambda:InvokeFunction --principal '*' --invoked-via-function-url"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "aws lambda remove-permission --region ${self.triggers.region} --function-name ${self.triggers.function_name} --statement-id ${self.triggers.statement_id} || true"
+  }
+
+  depends_on = [aws_lambda_function_url.api]
 }
 
 resource "aws_cloudwatch_log_group" "lambda" {

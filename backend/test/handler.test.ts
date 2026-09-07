@@ -72,12 +72,13 @@ describe("protected routes", () => {
     expect(await deps.store.listDates()).toEqual([isoDateInTZ()]);
   });
 
-  it("replays a past date consistently", async () => {
+  it("serves the same word for a date on repeat requests", async () => {
     const token = await login();
-    const q = { date: "2026-02-10" };
+    const q = { date: isoDateInTZ() };
     const a = parse(await handleRequest(ev("GET", "/api/puzzle", { token, query: q }), deps));
     const b = parse(await handleRequest(ev("GET", "/api/puzzle", { token, query: q }), deps));
     expect(a.word).toBe(b.word);
+    expect(a.word).toHaveLength(5);
   });
 
   it("refuses a future date", async () => {
@@ -87,6 +88,15 @@ describe("protected routes", () => {
       deps,
     );
     expect(res.statusCode).toBe(403);
+  });
+
+  it("refuses a date before the game launched", async () => {
+    const token = await login();
+    const res = await handleRequest(
+      ev("GET", "/api/puzzle", { token, query: { date: "2026-09-06" } }),
+      deps,
+    );
+    expect(res.statusCode).toBe(404);
   });
 
   it("rejects a malformed date", async () => {
@@ -109,8 +119,9 @@ describe("protected routes", () => {
 
   it("lists history", async () => {
     const token = await login();
-    await handleRequest(ev("GET", "/api/puzzle", { token, query: { date: "2026-01-05" } }), deps);
+    const today = isoDateInTZ();
+    await handleRequest(ev("GET", "/api/puzzle", { token, query: { date: today } }), deps);
     const res = await handleRequest(ev("GET", "/api/history", { token }), deps);
-    expect(parse(res).dates).toContain("2026-01-05");
+    expect(parse(res).dates).toContain(today);
   });
 });

@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.60"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
   }
   # For a shared/remote state, configure a backend here (e.g. S3). The default
   # local state is fine for a single-maintainer personal project.

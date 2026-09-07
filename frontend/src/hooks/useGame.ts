@@ -3,6 +3,7 @@ import { loadDictionary } from "../lib/api";
 import {
   applyGuess,
   freshGame,
+  REVEAL_DURATION_MS,
   WORD_LENGTH,
   type GameState,
   type Puzzle,
@@ -30,6 +31,7 @@ export function useGame(puzzle: Puzzle | null): UseGame {
   const [invalidNonce, setInvalidNonce] = useState(0);
   const dict = useRef<Set<string> | null>(null);
   const msgTimer = useRef<number | undefined>(undefined);
+  const endTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     loadDictionary()
@@ -40,9 +42,18 @@ export function useGame(puzzle: Puzzle | null): UseGame {
   // Reload persisted progress whenever the puzzle (date) changes.
   useEffect(() => {
     if (!puzzle) return;
+    window.clearTimeout(endTimer.current);
     setState(sessionStore.load(puzzle.date) ?? freshGame(puzzle.date));
     setDraft("");
   }, [puzzle?.date]);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(msgTimer.current);
+      window.clearTimeout(endTimer.current);
+    },
+    [],
+  );
 
   const toast = useCallback((text: string) => {
     setMessage(text);
@@ -81,12 +92,23 @@ export function useGame(puzzle: Puzzle | null): UseGame {
     setState(next);
     sessionStore.save(next);
     setDraft("");
-    if (next.status === "won") toast(WIN_MESSAGES[next.guesses.length - 1] ?? "¡Bien!");
-    else if (next.status === "lost") toast(puzzle.word.toUpperCase());
+    if (next.status !== "playing") {
+      // Let the letters finish flipping before the verdict lands.
+      const text =
+        next.status === "won"
+          ? WIN_MESSAGES[next.guesses.length - 1] ?? "¡Bien!"
+          : puzzle.word.toUpperCase();
+      window.clearTimeout(endTimer.current);
+      endTimer.current = window.setTimeout(
+        () => toast(text),
+        REVEAL_DURATION_MS,
+      );
+    }
   }, [puzzle, state, draft, toast]);
 
   const replay = useCallback(() => {
     if (!puzzle) return;
+    window.clearTimeout(endTimer.current);
     sessionStore.clear(puzzle.date);
     setState(freshGame(puzzle.date));
     setDraft("");

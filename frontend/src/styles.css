@@ -96,11 +96,22 @@ body {
   border-bottom: 1px solid var(--border);
   padding: 8px 4px;
 }
+.app__brand {
+  text-align: center;
+}
 .app__title {
   font-weight: 800;
   letter-spacing: 0.18em;
   font-size: 1.7rem;
   margin: 0;
+}
+.app__tagline {
+  margin: 1px 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
 }
 .app__title-es {
   color: var(--correct);
@@ -163,6 +174,7 @@ body {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
+  perspective: 900px;
 }
 .tile {
   aspect-ratio: 1;
@@ -175,6 +187,9 @@ body {
   border: 2px solid var(--border);
   color: var(--fg);
   user-select: none;
+  /* keep every tile in a 3D context so the first flip frame doesn't trigger a
+     layer promotion (which shows up as a one-frame blink) */
+  backface-visibility: hidden;
 }
 .tile--filled {
   border-color: var(--tile-border);
@@ -195,6 +210,47 @@ body {
 @keyframes pop {
   0% { transform: scale(0.9); }
   100% { transform: scale(1); }
+}
+
+/* Dramatic letter-by-letter reveal: the tile flips edge-on, swaps to its
+   result colour at the halfway point, then flips back.
+   fill-mode `both` back-fills the 0% keyframe the instant the class lands, so
+   the final colour never paints for a frame before the flip starts. */
+.tile--reveal {
+  animation: flip 0.5s ease both;
+}
+.tile--reveal.tile--correct { animation: flip-correct 0.5s ease both; }
+.tile--reveal.tile--present { animation: flip-present 0.5s ease both; }
+.tile--reveal.tile--absent  { animation: flip-absent  0.5s ease both; }
+
+@keyframes flip {
+  0%   { transform: rotateX(0deg); }
+  50%  { transform: rotateX(-90deg); }
+  100% { transform: rotateX(0deg); }
+}
+@keyframes flip-correct {
+  0%    { transform: rotateX(0deg);   background: var(--bg); border-color: var(--tile-border); }
+  49.9% { transform: rotateX(-90deg); background: var(--bg); border-color: var(--tile-border); }
+  50%   { transform: rotateX(-90deg); background: var(--correct); border-color: var(--correct); }
+  100%  { transform: rotateX(0deg);   background: var(--correct); border-color: var(--correct); }
+}
+@keyframes flip-present {
+  0%    { transform: rotateX(0deg);   background: var(--bg); border-color: var(--tile-border); }
+  49.9% { transform: rotateX(-90deg); background: var(--bg); border-color: var(--tile-border); }
+  50%   { transform: rotateX(-90deg); background: var(--present); border-color: var(--present); }
+  100%  { transform: rotateX(0deg);   background: var(--present); border-color: var(--present); }
+}
+@keyframes flip-absent {
+  0%    { transform: rotateX(0deg);   background: var(--bg); border-color: var(--tile-border); }
+  49.9% { transform: rotateX(-90deg); background: var(--bg); border-color: var(--tile-border); }
+  50%   { transform: rotateX(-90deg); background: var(--absent); border-color: var(--absent); }
+  100%  { transform: rotateX(0deg);   background: var(--absent); border-color: var(--absent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile--reveal,
+  .tile--reveal.tile--correct,
+  .tile--reveal.tile--present,
+  .tile--reveal.tile--absent { animation: none; }
 }
 .row--shake {
   animation: shake 0.5s;

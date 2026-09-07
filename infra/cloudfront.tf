@@ -16,13 +16,6 @@ resource "aws_cloudfront_origin_access_control" "s3" {
   signing_protocol                  = "sigv4"
 }
 
-resource "aws_cloudfront_origin_access_control" "lambda" {
-  name                              = "${var.project}-lambda"
-  origin_access_control_origin_type = "lambda"
-  signing_behavior                  = "always"
-  signing_protocol                  = "sigv4"
-}
-
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   default_root_object = "index.html"
@@ -37,9 +30,8 @@ resource "aws_cloudfront_distribution" "site" {
   }
 
   origin {
-    origin_id                = local.lambda_origin_id
-    domain_name              = local.lambda_url_host
-    origin_access_control_id = aws_cloudfront_origin_access_control.lambda.id
+    origin_id   = local.lambda_origin_id
+    domain_name = local.lambda_url_host
 
     custom_origin_config {
       http_port              = 80
@@ -67,20 +59,6 @@ resource "aws_cloudfront_distribution" "site" {
     compress                 = true
     cache_policy_id          = data.aws_cloudfront_cache_policy.caching_disabled.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer_except_host.id
-  }
-
-  # SPA fallback: unknown paths serve the app shell.
-  custom_error_response {
-    error_code            = 403
-    response_code         = 200
-    response_page_path    = "/index.html"
-    error_caching_min_ttl = 10
-  }
-  custom_error_response {
-    error_code            = 404
-    response_code         = 200
-    response_page_path    = "/index.html"
-    error_caching_min_ttl = 10
   }
 
   restrictions {

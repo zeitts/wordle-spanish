@@ -3,6 +3,10 @@ import { evaluate, type LetterState } from "./evaluate";
 export const MAX_GUESSES = 6;
 export const WORD_LENGTH = 5;
 
+// Dramatic per-letter reveal of a submitted guess: each tile flips in turn.
+export const REVEAL_STAGGER_MS = 260;
+export const REVEAL_DURATION_MS = REVEAL_STAGGER_MS * WORD_LENGTH + 140;
+
 export type GameStatus = "playing" | "won" | "lost";
 
 export interface GameState {

@@ -1,4 +1,5 @@
 import { sessionStore } from "../lib/storage";
+import { LAUNCH_DATE } from "../lib/config";
 import type { GameState } from "../lib/game";
 
 interface Props {
@@ -16,12 +17,15 @@ function statusLabel(s: GameState | null): string {
   return "";
 }
 
-// The last `count` dates ending today, newest first.
-function recentDates(today: string, count = 180): string[] {
+// Every playable date, newest first: from today back to launch day (inclusive).
+function recentDates(today: string): string[] {
   const start = Date.parse(`${today}T00:00:00Z`);
-  return Array.from({ length: count }, (_, i) =>
-    new Date(start - i * 86_400_000).toISOString().slice(0, 10),
-  );
+  const floor = Date.parse(`${LAUNCH_DATE}T00:00:00Z`);
+  const out: string[] = [];
+  for (let t = start; t >= floor; t -= 86_400_000) {
+    out.push(new Date(t).toISOString().slice(0, 10));
+  }
+  return out;
 }
 
 export function ArchivePicker({ today, activeDate, onPick, onClose }: Props) {

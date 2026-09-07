@@ -76,9 +76,12 @@ function Game({ onLock }: { onLock: () => void }) {
         <button className="linkbtn" onClick={() => setArchiveOpen(true)}>
           Archivo
         </button>
-        <h1 className="app__title">
-          WORDLE<span className="app__title-es">ES</span>
-        </h1>
+        <div className="app__brand">
+          <h1 className="app__title">
+            WORDLE<span className="app__title-es">ES</span>
+          </h1>
+          <p className="app__tagline">the señorita's version</p>
+        </div>
         <button className="linkbtn" onClick={onLock}>
           Salir
         </button>

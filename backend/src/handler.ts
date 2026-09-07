@@ -1,5 +1,10 @@
 import { MAX_GUESSES, WORD_LENGTH } from "./config.js";
-import { isFutureDate, isoDateInTZ, isValidDateString } from "./date.js";
+import {
+  isBeforeLaunch,
+  isFutureDate,
+  isoDateInTZ,
+  isValidDateString,
+} from "./date.js";
 import {
   bearerFrom,
   checkPassword,
@@ -99,6 +104,9 @@ export async function handleRequest(
       }
       if (isFutureDate(date)) {
         return json(403, { error: "that day has not happened yet" });
+      }
+      if (isBeforeLaunch(date)) {
+        return json(404, { error: "the game did not exist yet on that day" });
       }
       const record = await getOrCreatePuzzle(deps.store, date);
       return json(200, {
