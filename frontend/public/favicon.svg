@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- 3x3 board using the tile palette from src/styles.css.
+       scripts/build-icons.mjs rasterises this same mark into favicon.ico
+       and apple-touch-icon.png -- keep the three in sync. -->
+  <rect width="32" height="32" rx="6" fill="#121213" />
+  <rect x="4" y="4" width="7" height="7" rx="1.5" fill="#538d4e" />
+  <rect x="12.5" y="4" width="7" height="7" rx="1.5" fill="#3a3a3c" />
+  <rect x="21" y="4" width="7" height="7" rx="1.5" fill="#b59f3b" />
+  <rect x="4" y="12.5" width="7" height="7" rx="1.5" fill="#3a3a3c" />
+  <rect x="12.5" y="12.5" width="7" height="7" rx="1.5" fill="#538d4e" />
+  <rect x="21" y="12.5" width="7" height="7" rx="1.5" fill="#3a3a3c" />
+  <rect x="4" y="21" width="7" height="7" rx="1.5" fill="#b59f3b" />
+  <rect x="12.5" y="21" width="7" height="7" rx="1.5" fill="#3a3a3c" />
+  <rect x="21" y="21" width="7" height="7" rx="1.5" fill="#538d4e" />
+</svg>
